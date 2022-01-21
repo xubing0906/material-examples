@@ -202,8 +202,7 @@ CCProgram standard-fs %{
   #include <cc-global>
   #include <shared-ubos>
   #include <cc-fog-fs>
-  //#include <standard-surface-entry>
-  #include <./standard-surface-entry-jelly>
+  #include <standard-surface-entry>
   #if USE_LIGHTMAP && !USE_BATCHING && !CC_FORWARD_ADD
     #include <lightingmap-fs>
   #endif
@@ -213,6 +212,7 @@ CCProgram standard-fs %{
   in vec2 v_uv1;
   in vec3 v_normal;
   in mat4 matWorldIT_L;
+
 
   #if USE_VERTEX_COLOR
     in vec4 v_color;
@@ -243,18 +243,21 @@ CCProgram standard-fs %{
     #pragma define EMISSIVE_UV options([v_uv, v_uv1])
   #endif
 
-  #define OCCLUSION_CHANNEL r
-  #define ROUGHNESS_CHANNEL g
-  #define METALLIC_CHANNEL  b
+  #define OCCLUSION_CHANNEL          r
+  #define ROUGHNESS_CHANNEL          g
+  #define METALLIC_CHANNEL           b
+  #define SPECULAR_INTENSITY_CHANNEL a
 
   #if USE_ALPHA_TEST
     #pragma define ALPHA_TEST_CHANNEL options([a, r])
   #endif
+  
 
   void surf (out StandardSurface s) {
     vec4 baseColor = albedo;
-    #if USE_VERTEX_COLORnp
-      baseColor *= v_color;
+    #if USE_VERTEX_COLOR
+      baseColor.rgb *= SRGBToLinear(v_color.rgb); // use linear
+      baseColor.a *= v_color.a;
     #endif
     #if USE_ALBEDO_MAP
       vec4 texColor = texture(albedoMap, ALBEDO_UV);
@@ -270,7 +273,7 @@ CCProgram standard-fs %{
     vec3 viewDir = normalize(cc_cameraPos.xyz - v_position);
     float fresnel = fresnelBase + fresnelScale*pow(1.0 - dot(N, viewDir), fresnelIndensity);
     s.albedo = baseColor;
-    s.IBL = IBLlevel;
+    
     s.albedo.rgb *= albedoScaleAndCutoff.xyz;
     s.albedo.rgb += mix((s.albedo.rgb)+(highlightColor.rgb), Fresnelcol.rgb, fresnel) * Fresnelcol.a;
     
@@ -294,7 +297,7 @@ CCProgram standard-fs %{
         nmmp.z * normalize(s.normal);
     #endif
 
-    s.position = v_position;
+    HIGHP_VALUE_TO_STRUCT_DEFINED(v_position, s.position);
 
     vec4 pbr = pbrParams;
     #if USE_PBR_MAP
@@ -302,6 +305,7 @@ CCProgram standard-fs %{
       pbr.x *= res.OCCLUSION_CHANNEL;
       pbr.y *= res.ROUGHNESS_CHANNEL;
       pbr.z *= res.METALLIC_CHANNEL;
+      pbr.w *= res.SPECULAR_INTENSITY_CHANNEL;
     #endif
     #if USE_METALLIC_ROUGHNESS_MAP
       vec4 metallicRoughness = texture(metallicRoughnessMap, PBR_UV);
@@ -311,17 +315,15 @@ CCProgram standard-fs %{
     #if USE_OCCLUSION_MAP
       pbr.x *= texture(occlusionMap, PBR_UV).OCCLUSION_CHANNEL;
     #endif
-    s.occlusion = clamp(pbr.x, 0.0, 0.96);
-    s.roughness = clamp(pbr.y, 0.04, 1.0);
+    s.occlusion = pbr.x;
+    s.roughness = pbr.y;
     s.metallic = pbr.z;
 
     s.emissive = emissive.rgb * emissiveScaleParam.xyz;
     #if USE_EMISSIVE_MAP
       s.emissive *= SRGBToLinear(texture(emissiveMap, EMISSIVE_UV).rgb);
     #endif
-
   }
-
 
   CC_STANDARD_SURFACE_ENTRY()
 }%
