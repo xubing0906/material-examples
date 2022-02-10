@@ -138,7 +138,6 @@ CCProgram standard-vs %{
   out vec3 v_normal;
   out vec2 v_uv;
   out vec2 v_uv1;
-  out mat4 matWorldIT_L;
   out float maorongtilling;
 
   #if USE_NORMAL_MAP
@@ -160,8 +159,6 @@ CCProgram standard-vs %{
 
     mat4 matWorld, matWorldIT;
     CCGetWorldMatrixFull(matWorld, matWorldIT);
-    matWorldIT_L = matWorldIT;
-
     vec4 pos = matWorld * In.position;
 
     v_position = pos.xyz;
@@ -214,7 +211,6 @@ CCProgram standard-fs %{
   in vec2 v_uv;
   in vec2 v_uv1;
   in vec3 v_normal;
-  in mat4 matWorldIT_L;
   in float maorongtilling;
 
   #if USE_VERTEX_COLOR
@@ -267,7 +263,6 @@ CCProgram standard-fs %{
     float fresnelBase = rampParams.x;
     float fresnelScale = rampParams.y;
     float fresnelIndensity = rampParams.z;
-    vec4 cc_cameraPoslocal = matWorldIT_L * cc_cameraPos;
     vec3 N = normalize(v_normal);
     vec3 lightDir = normalize(-cc_mainLitDir.xyz);
     vec3 viewDir = normalize(cc_cameraPos.xyz - v_position);
