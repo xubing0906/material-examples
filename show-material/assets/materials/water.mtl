@@ -32,15 +32,15 @@
         "a": 255
       },
       "noiseTexture": {
-        "__uuid__": "0620d166-8f35-4cd8-8a3d-122449826874@6c48a",
+        "__uuid__": "5799facf-c6dc-4534-a2d5-458947b0dab2@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "noiseTexture2": {
-        "__uuid__": "acff3fd6-4bbe-4432-b475-f55590770347@6c48a",
+        "__uuid__": "0620d166-8f35-4cd8-8a3d-122449826874@6c48a",
         "__expectedType__": "cc.Texture2D"
       },
       "noiseTexture3": {
-        "__uuid__": "625d0f64-f1c1-466d-a493-6da4d10bdac7@6c48a",
+        "__uuid__": "8d633ddf-d33f-45b2-b782-aca3d765347e@6c48a",
         "__expectedType__": "cc.Texture2D"
       }
     }
